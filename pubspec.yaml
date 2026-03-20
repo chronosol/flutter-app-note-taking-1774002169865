@@ -7,5 +7,6 @@ environment:
 
 dependencies:
   flutter:
-    uses-material-design: true
- true
+    sdk: flutter
+  flutter_riverpod: any
+  go_router: any
