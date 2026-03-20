@@ -2,36 +2,37 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/entities/note.dart';
 import '../../domain/repositories/note_repository.dart';
 
-class NoteController extends AsyncNotifier<List<Note>> {
+class NoteController extends StateNotifier<AsyncValue<List<Note>>> {
   final NoteRepository repository;
 
-  NoteController(this.repository);
+  NoteController(this.repository) : super(const AsyncValue.loading()) {
+    _initialize();
+  }
 
-  @override
-  Future<List<Note>> build() async {
-    return repository.fetchNotes();
+  Future<void> _initialize() async {
+    state = await AsyncValue.guard(() => repository.fetchNotes());
   }
 
   Future<void> addNote(Note note) async {
     state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() => repository.addNote(note));
+    await repository.addNote(note);
     state = await AsyncValue.guard(() => repository.fetchNotes());
   }
 
   Future<void> updateNote(Note note) async {
     state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() => repository.updateNote(note));
+    await repository.updateNote(note);
     state = await AsyncValue.guard(() => repository.fetchNotes());
   }
 
   Future<void> deleteNoteById(String id) async {
     state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() => repository.deleteNote(id));
+    await repository.deleteNote(id);
     state = await AsyncValue.guard(() => repository.fetchNotes());
   }
 }
 
-final noteControllerProvider = AsyncNotifierProvider<NoteController, List<Note>>(
+final noteControllerProvider = StateNotifierProvider<NoteController, AsyncValue<List<Note>>>(
   (ref) => NoteController(ref.read(noteRepositoryProvider)),
 );
 
